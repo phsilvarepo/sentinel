@@ -1,0 +1,5 @@
+train: /home/unparallel/Desktop/meshroom_server/dataset/images/train
+val: /home/unparallel/Desktop/meshroom_server/dataset/images/val
+
+nc: 1
+names: ['obj']
