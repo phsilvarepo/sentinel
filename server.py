@@ -35,6 +35,13 @@ OUTPUT_DIR = "/home/unparallel/Desktop/meshroom_server/meshroom_output"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+
+MINIO_ENDPOINT = "http://10.0.1.140:9000"
+BUCKET_NAME = "sentinel"
+
+EXPORT_NAME = "meshroom_tflite"
+OBJECT_NAME = f"meshroom/{EXPORT_NAME}.tflite"
+
 # ---------------------------------------- #
 
 app = FastAPI()
@@ -103,13 +110,30 @@ def upload_images(images: List[UploadFile] = File(...)):
     except subprocess.CalledProcessError:
         raise HTTPException(status_code=500, detail="Replicator failed")
 
+    # 5. Train
+    TRAIN_SCRIPT = "/home/unparallel/Desktop/meshroom_server/train_yolov11.py"
+    try:
+        subprocess.check_call(["python3", TRAIN_SCRIPT])
+    except subprocess.CalledProcessError:
+        raise HTTPException(status_code=500, detail="YOLOv11 train failed")
+
+    # 6. Export & upload YOLOv11 to TFLite
+    EXPORT_SCRIPT = "/home/unparallel/Desktop/meshroom_server/export_yolov11_tflite.py"
+    try:
+        subprocess.check_call(["python3", EXPORT_SCRIPT])
+    except subprocess.CalledProcessError:
+        raise HTTPException(status_code=500, detail="YOLOv11 export/upload failed")
+
     return {
         "status": "ok",
-        "images": len(images),
-        "mesh": obj_path,
-        "message": "Pipeline completed successfully"
+        "model_id": EXPORT_NAME,
+        "tflite_url": f"{MINIO_ENDPOINT}/{BUCKET_NAME}/{OBJECT_NAME}",
+        "input_size": 640,
+        "classes": 1,
+        "quantization": "float16"
     }
 
+    
 @app.post("/test-usd-replicator")
 def test_usd_and_replicator():
 
@@ -122,5 +146,10 @@ def test_usd_and_replicator():
 
     return {
         "status": "ok",
-        "message": "USD conversion, Replicator, dataset processing, YOLOv11 training, and TFLite export/upload completed"
+        "model_id": EXPORT_NAME,
+        "tflite_url": f"{MINIO_ENDPOINT}/{BUCKET_NAME}/{OBJECT_NAME}",
+        "input_size": 640,
+        "classes": 1,
+        "quantization": "float16"
     }
+
