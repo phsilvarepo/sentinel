@@ -15,12 +15,15 @@ ISAAC_ROOT = "/home/unparallel/isaacsim/_build/linux-x86_64/release"
 ISAAC_PYTHON = f"{ISAAC_ROOT}/python.sh"
 USD_CONVERTER = "standalone_examples/api/omni.kit.asset_converter/asset_usd_converter.py"
 REPLICATOR_SCRIPT = "standalone_examples/replicator/object_based_sdg/object_based_sdg.py"
+DATASET_POSTPROCESS_SCRIPT = "/home/unparallel/Desktop/meshroom_server/dataset_postprocess.py"
 REPLICATOR_CONFIG = "standalone_examples/replicator/object_based_sdg/config/meshroom.yaml"
 TRAIN_SCRIPT = "/home/unparallel/Desktop/meshroom_server/train_yolov11.py"
-EXPORT_SCRIPT = "/home/unparallel/Desktop/meshroom_server/export_and_upload_yolov11.py"
+EXPORT_SCRIPT = "/home/unparallel/Desktop/meshroom_server/export_yolov11_tflite.py"
 UPLOAD_DIR = "/home/unparallel/Desktop/meshroom_server/uploads"
 OUTPUT_DIR = "/home/unparallel/Desktop/meshroom_server/meshroom_output"
-PIPELINE = "/home/unparallel/Desktop/meshroom_server/obj_pipeline.mg"
+DATASET_DIR="/home/unparallel/isaacsim/_build/linux-x86_64/release/bbox"
+OUTPUT_DATASET_DIR="/home/unparallel/Desktop/meshroom_server/dataset/"
+PIPELINE_PATH = "/home/unparallel/Desktop/meshroom_server/obj_pipeline.mg"
 
 MINIO_ENDPOINT = "http://10.0.1.140:9000"
 BUCKET_NAME = "sentinel"
@@ -46,6 +49,7 @@ class JobStage(str, Enum):
     MESHROOM = "Running Meshroom"
     USD = "Converting to USD"
     REPLICATOR = "Running Replicator"
+    POSTPROCESSING = "Postprocessing Dataset"
     TRAINING = "Training YOLOv11"
     EXPORT = "Exporting TFLite"
     DONE = "Completed"
@@ -70,8 +74,9 @@ def run_full_pipeline(job_id: str):
     object_name = f"meshroom/{tflite_name}"
 
     try:
-        update_job(job_id, JobStage.MESHROOM)
+        #update_job(job_id, JobStage.MESHROOM)
         subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir])
+        #subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir, "--pipeline", PIPELINE_PATH])
 
         obj_path = os.path.join(job_output_dir, "texturedMesh.obj")
         if not os.path.exists(obj_path):
@@ -83,11 +88,13 @@ def run_full_pipeline(job_id: str):
 
         update_job(job_id, JobStage.REPLICATOR)
 
-        usd_file = os.path.join(job_output_dir, "texturedMesh.usd")
+        usd_file = os.path.join(job_output_dir + "_converted", "texturedMesh_obj.usd")
         job_yaml = generate_job_yaml(job_id, usd_file)
 
         subprocess.check_call([ISAAC_PYTHON, REPLICATOR_SCRIPT, "--config", job_yaml], cwd=ISAAC_ROOT)
 
+        update_job(job_id, JobStage.POSTPROCESSING)
+        subprocess.check_call(["python3", DATASET_POSTPROCESS_SCRIPT, "--dataset_dir", DATASET_DIR, "--output_dir", OUTPUT_DATASET_DIR])
 
         update_job(job_id, JobStage.TRAINING)
         subprocess.check_call(["python3", TRAIN_SCRIPT, "--project_name", job_id])
@@ -104,6 +111,7 @@ def run_full_pipeline(job_id: str):
 
     except subprocess.CalledProcessError as e:
         update_job(job_id, JobStage.FAILED)
+
 
 # ---------------- API ENDPOINTS ---------------- #
 @app.post("/upload")

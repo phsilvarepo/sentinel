@@ -4,6 +4,7 @@ import json
 import shutil
 import random
 from pathlib import Path
+import argparse
 
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 640
@@ -79,3 +80,18 @@ def split_yolo_dataset(dataset_dir, output_dir, train_ratio=0.8, move_files=True
     handle(val, "val")
 
     print("✅ Dataset split complete")
+    
+def main():
+    parser = argparse.ArgumentParser(description="Postprocess the dataset.")
+    parser.add_argument("--dataset_dir", type=str, required=True, help="Path to the dataset")
+    parser.add_argument("--output_dir", type=str, required=True, help="Path to save the processed dataset")
+    
+    args = parser.parse_args()
+    
+    # Use args.dataset_dir and args.output_dir here for processing
+    convert_npy_to_yolo_txt(args.dataset_dir)
+    split_yolo_dataset(args.dataset_dir, args.output_dir)
+
+if __name__ == "__main__":
+    main()
+
