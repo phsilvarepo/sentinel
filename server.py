@@ -70,13 +70,13 @@ def run_full_pipeline(job_id: str):
 
     # Use a simplified timestamp for the weight file
     timestamp = datetime.now().strftime("%Y%m%d_%H")
-    tflite_name = f"{job_id}_{timestamp}.tflite"
+    tflite_name = f"{job_id}_{timestamp}"
     object_name = f"meshroom/{tflite_name}"
 
     try:
-        #update_job(job_id, JobStage.MESHROOM)
-        subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir])
-        #subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir, "--pipeline", PIPELINE_PATH])
+        update_job(job_id, JobStage.MESHROOM)
+        #subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir])
+        subprocess.check_call([MESHROOM_BIN, "--input", job_upload_dir, "--output", job_output_dir, "--pipeline", PIPELINE_PATH])
 
         obj_path = os.path.join(job_output_dir, "texturedMesh.obj")
         if not os.path.exists(obj_path):
@@ -161,6 +161,15 @@ def job_status(job_id: str):
         "stage": job["stage"],
         "tflite_url": job.get("tflite_url")
     }
+
+@app.get("/jobs")
+def list_all_jobs():
+    with jobs_lock:
+        # Returns a list of all job details currently in memory
+        return [
+            {"job_id": j_id, "stage": data["stage"], "tflite_url": data.get("tflite_url")}
+            for j_id, data in jobs.items()
+        ]
 
 @app.get("/models")
 def list_models():

@@ -14,6 +14,7 @@
             "MeshFiltering": "3.0",
             "Meshing": "7.0",
             "PrepareDenseScene": "3.1",
+            "Publish": "1.3",
             "StructureFromMotion": "3.3",
             "Texturing": "6.0"
         }
@@ -556,6 +557,36 @@
                 "output": "{nodeCacheFolder}",
                 "undistorted": "{nodeCacheFolder}/<VIEW_ID>.{outputFileTypeValue}"
             }
+        },
+        "Publish_1": {
+            "nodeType": "Publish",
+            "position": [
+                2221,
+                10
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 3,
+                "split": 1
+            },
+            "uid": "73cfc4e7af0f08c5caaa94bff16b2cec2cb9f1e0",
+            "internalFolder": "{cache}/{nodeType}/{uid}",
+            "inputs": {
+                "inputFiles": [
+                    "{Texturing_1.outputMesh}",
+                    "{Texturing_1.outputMaterial}",
+                    "{Texturing_1.outputTextures}"
+                ],
+                "output": "/home/unparallel/Desktop/meshroom_server/meshroom_output",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {}
         },
         "StructureFromMotion_1": {
             "nodeType": "StructureFromMotion",
