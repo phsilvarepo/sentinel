@@ -1,4 +1,4 @@
-# Sentinel – Synthetic Data & Validation Server
+# Sentinel – Streamlined Custom Object Detection Pipeline
 
 Sentinel is a FastAPI-based backend service designed to integrate with NVIDIA Isaac Sim, Meshroom, and YOLO. The system describes a pipeline to enable the detection of custom objects using the YOLO architecture. To utilize the pipeline, an Android app is necessary that connects to the server running Sentinel on the same network. To begin usage, the app transmits several images of the desired object in order to create the 3D model. Furthermore, with this model, we employ Isaac Sim synthetic generation capabilities to generate a dataset to train the object detection architecture. The final step of the pipeline consists of storing the weights in MinIO to enable the user to perform validation using the Sentinel app on live camera, images, or videos.
 
