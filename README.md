@@ -50,3 +50,6 @@ In parallel it is necessary for MinIO to be running:
 minio server ~/minio --console-address :9001
 ```
 
+### Debugging
+
+When implementing this package in environment it is necessary to update the addresse for MinIO in the server.py and also in the app code.
