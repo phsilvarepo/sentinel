@@ -50,6 +50,14 @@ In parallel it is necessary for MinIO to be running:
 minio server ~/minio --console-address :9001
 ```
 
+## Resuming Pipeline
+
+If the system crashes at any point, it is possible to resume the pipeline with the job_id and the stage to resume:
+```
+python3 resume_pipeline.py <job_id> --start <stage>
+```
+The supported stages are: meshroom, usd, replicator, postprocess, train and export
+
 ### Debugging
 
 When implementing this package in environment it is necessary to update the addresses for MinIO in the server.py and also in the app code.
