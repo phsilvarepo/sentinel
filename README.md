@@ -38,7 +38,7 @@ source venv/bin/activate
 ```
 Install dependencies:
 ```
-pip install fastapi uvicorn numpy ultralytics boto3
+pip install fastapi uvicorn "numpy<2" ultralytics boto3
 ```
 Run server:
 ```
