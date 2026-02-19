@@ -37,7 +37,7 @@ jobs_lock = Lock()
 
 # ---------------- MINIO ---------------- #
 minio_client = Minio(
-    "10.0.1.140:9000",
+    "10.0.1.166:9000",
     access_key="minioadmin",
     secret_key="minioadmin",
     secure=False
